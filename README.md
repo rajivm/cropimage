@@ -22,7 +22,7 @@
 Cropimage
 =========
 
-![Screenshot](http://i41.tinypic.com/5lz7d0.png "Screenshot")
+![Screenshot](http://i43.tinypic.com/2ur71c9.png "Screenshot")
 
 - Added support for building with Gradle
 - Replacement for deprecated official Android crop image function
