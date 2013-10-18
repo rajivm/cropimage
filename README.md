@@ -22,6 +22,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Cropimage
 =========
 
+![Screenshot](http://i41.tinypic.com/5lz7d0.png "Screenshot")
+
 - Added support for building with Gradle
 - Replacement for deprecated official Android crop image function
 - > 2.2 API
