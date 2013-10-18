@@ -7,7 +7,7 @@
     <string name="preparing_card">Preparing card</string>
     <string name="no_storage_card">No storage card</string>
     <string name="not_enough_space">Not enough space</string>
-    <string name="rotate_left">Rotate right</string>
+    <string name="rotate_left">Rotate left</string>
     <string name="rotate_right">Rotate right</string>
     <string name="please_wait">Please wait&#8230;</string>
 
