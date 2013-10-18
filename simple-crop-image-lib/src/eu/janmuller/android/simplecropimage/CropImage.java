@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -48,6 +49,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 
@@ -71,6 +73,24 @@ public class CropImage extends MonitoredActivity {
     public static final  String RETURN_DATA            = "return-data";
     public static final  String RETURN_DATA_AS_BITMAP  = "data";
     public static final  String ACTION_INLINE_DATA     = "inline-data";
+    
+    /**
+     * Specify the compression factor that should be used when saving the cropped image.
+     * 
+     * This value should be 0 < value < 100
+     * 
+     * Default 90
+     */
+    public static final  String COMPRESSION_FACTOR     = "compression_factor";
+    /**
+     * Specify the default crop area width in relation to the image width.
+     * Passing 80 means that the crop area width will be the 80 percent of the image width.
+     * 
+     * This value should be 0 < value < 100
+     * 
+     * Default 80
+     */
+    public static final  String CROP_AREA_WIDTH    	   = "crop_area_width_percentage";
 
     // These are various options can be specified in the intent.
     private       Bitmap.CompressFormat mOutputFormat    = Bitmap.CompressFormat.JPEG;
@@ -88,6 +108,8 @@ public class CropImage extends MonitoredActivity {
     private ContentResolver mContentResolver;
     private Bitmap          mBitmap;
     private String          mImagePath;
+    private int 			mCompressionFactor;
+    private double 			mCropDefaulWidthFactor;
 
     boolean       mWaitingToPick; // Whether we are wait the user to pick a face.
     boolean       mSaving;  // Whether the "save" button is already clicked.
@@ -100,13 +122,13 @@ public class CropImage extends MonitoredActivity {
     private final BitmapManager.ThreadSet mDecodingThreads =
             new BitmapManager.ThreadSet();
 
-    @Override
+    @SuppressLint("NewApi")
+	@Override
     public void onCreate(Bundle icicle) {
 
         super.onCreate(icicle);
         mContentResolver = getContentResolver();
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.cropimage);
 
         mImageView = (CropImageView) findViewById(R.id.image);
@@ -151,6 +173,41 @@ public class CropImage extends MonitoredActivity {
             mOutputY = extras.getInt(OUTPUT_Y);
             mScale = extras.getBoolean(SCALE, true);
             mScaleUp = extras.getBoolean(SCALE_UP_IF_NEEDED, true);
+            
+            if(extras.containsKey(COMPRESSION_FACTOR)){
+            	
+            	int factor = extras.getInt(COMPRESSION_FACTOR);
+            	
+            	if(factor > 0 && factor < 100){
+            	
+            		mCompressionFactor = factor;
+
+            	} else {
+            		
+            		Log.e("CropImage","COMPRESSION_FACTOR must be 0 < COMPRESSION_FACTOR < 100");
+            	}
+            } else {
+            	
+            	mCompressionFactor = 90;
+            }
+            
+            if(extras.containsKey(CROP_AREA_WIDTH)){
+            	
+            	int factor = extras.getInt(CROP_AREA_WIDTH);
+            	
+            	if (factor > 0 && factor < 100){
+            	
+            		mCropDefaulWidthFactor = factor / 100;
+
+            	} else {
+            		
+            		Log.e("CropImage", "CROP_AREA_WIDTH must be 0 < CROP_AREA_WIDTH < 100");
+            	}
+            }else{
+            	
+            	mCropDefaulWidthFactor = 0.8;
+            }
+            
         }
 
 
@@ -160,9 +217,6 @@ public class CropImage extends MonitoredActivity {
             finish();
             return;
         }
-
-        // Make UI fullscreen.
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         findViewById(R.id.discard).setOnClickListener(
                 new View.OnClickListener() {
@@ -184,7 +238,9 @@ public class CropImage extends MonitoredActivity {
                         }
                     }
                 });
-        findViewById(R.id.rotateLeft).setOnClickListener(
+        
+        ImageButton rotateLeft = (ImageButton) findViewById(R.id.rotateLeft);
+        rotateLeft.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
 
@@ -195,7 +251,10 @@ public class CropImage extends MonitoredActivity {
                     }
                 });
 
-        findViewById(R.id.rotateRight).setOnClickListener(
+        CheatSheet.setup(rotateLeft);
+        
+        ImageButton rotateRight = (ImageButton) findViewById(R.id.rotateRight);
+        rotateRight.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
 
@@ -205,6 +264,9 @@ public class CropImage extends MonitoredActivity {
                         mRunFaceDetection.run();
                     }
                 });
+        
+        CheatSheet.setup(rotateRight);
+        
         startFaceDetection();
     }
 
@@ -257,7 +319,7 @@ public class CropImage extends MonitoredActivity {
         mImageView.setImageBitmapResetBase(mBitmap, true);
 
         Util.startBackgroundJob(this, null,
-                "Please wait\u2026",
+                getString(R.string.please_wait),
                 new Runnable() {
                     public void run() {
 
@@ -418,7 +480,7 @@ public class CropImage extends MonitoredActivity {
             try {
                 outputStream = mContentResolver.openOutputStream(mSaveUri);
                 if (outputStream != null) {
-                    croppedImage.compress(mOutputFormat, 90, outputStream);
+                    croppedImage.compress(mOutputFormat, mCompressionFactor, outputStream);
                 }
             } catch (IOException ex) {
 
@@ -527,8 +589,7 @@ public class CropImage extends MonitoredActivity {
 
             Rect imageRect = new Rect(0, 0, width, height);
 
-            // make the default size about 4/5 of the width or height
-            int cropWidth = Math.min(width, height) * 4 / 5;
+			int cropWidth = (int) (width * mCropDefaulWidthFactor);
             int cropHeight = cropWidth;
 
             if (mAspectX != 0 && mAspectY != 0) {
@@ -541,7 +602,7 @@ public class CropImage extends MonitoredActivity {
                     cropWidth = cropHeight * mAspectX / mAspectY;
                 }
             }
-
+            
             int x = (width - cropWidth) / 2;
             int y = (height - cropHeight) / 2;
 
@@ -644,7 +705,7 @@ public class CropImage extends MonitoredActivity {
 
         if (noStorageText != null) {
 
-            Toast.makeText(activity, noStorageText, 5000).show();
+            Toast.makeText(activity, noStorageText, Toast.LENGTH_LONG).show();
         }
     }
 

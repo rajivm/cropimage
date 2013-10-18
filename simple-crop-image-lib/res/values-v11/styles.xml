@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="CropImageTheme" parent="@android:style/Theme.Holo.NoActionBar.Fullscreen"></style>
+
+    <style name="CropButton" parent="@android:style/Widget.Holo.Button.Borderless">
+        <item name="android:minWidth">80dp</item>
+    </style>
+
+</resources>

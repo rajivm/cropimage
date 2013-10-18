@@ -52,10 +52,14 @@ class HighlightView {
                 resources.getDrawable(R.drawable.camera_crop_height);
         mResizeDrawableDiagonal =
                 resources.getDrawable(R.drawable.indicator_autocrop);
+        
+        mOutlineColor = resources.getColor(R.color.outline_color);
     }
 
     boolean mIsFocused;
     boolean mHidden;
+    
+    int mOutlineColor;
 
     public boolean hasFocus() {
 
@@ -125,7 +129,7 @@ class HighlightView {
 
                 path.addRect(new RectF(mDrawRect), Path.Direction.CW);
             
-		mOutlinePaint.setColor(0xFFFF8A00);    
+		mOutlinePaint.setColor(mOutlineColor);    
 
             }
             

@@ -8,4 +8,10 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
 
+    <application>
+        <activity
+            android:name="eu.janmuller.android.simplecropimage.CropImage"
+            android:theme="@style/CropImageTheme" />
+    </application>
+
 </manifest>

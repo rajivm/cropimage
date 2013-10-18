@@ -21,7 +21,7 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 
-public class MonitoredActivity extends Activity {
+public abstract class MonitoredActivity extends Activity {
 
     private final ArrayList<LifeCycleListener> mListeners =
             new ArrayList<LifeCycleListener>();
