@@ -197,7 +197,7 @@ public class CropImage extends MonitoredActivity {
             	
             	if (factor > 0 && factor < 100){
             	
-            		mCropDefaulWidthFactor = factor / 100;
+                    mCropDefaulWidthFactor = factor / 100f;
 
             	} else {
             		
