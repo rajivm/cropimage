@@ -89,17 +89,10 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 Building with Gradle
 --------------------
 
-To build with gradle, make sure you have installed the gradle wrapper in the top level directory.
-On my computer this is typically done (from the root of this project) with a:
-
-    cp -Rv /opt/android-studio/sdk/tools/templates/gradle/wrapper/* .
-
-Make sure to adjust the path to whereever you installed Android Studio.
-
-After doing this, to build issue the following command (again from the root of this project):
+To build the whole project:
 
     ./gradlew assembleDebug
 
 To install the example a running emulator or device, do a:
 
-    adb install -r ./simple-crop-image-example/build/apk/simple-crop-image-example-debug-unaligned.apk
+    ./gradlew :cropimage-sample:installDebug
