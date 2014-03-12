@@ -47,8 +47,6 @@ import android.os.Handler;
 import android.os.StatFs;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -62,6 +60,7 @@ public class CropImage extends MonitoredActivity {
 
     private static final String TAG                    = "CropImage";
     public static final  String IMAGE_PATH             = "image-path";
+    public static final  String OUTPUT_IMAGE_PATH      = "output-image-path";
     public static final  String SCALE                  = "scale";
     public static final  String ORIENTATION_IN_DEGREES = "orientation_in_degrees";
     public static final  String ASPECT_X               = "aspectX";
@@ -107,7 +106,7 @@ public class CropImage extends MonitoredActivity {
     private CropImageView   mImageView;
     private ContentResolver mContentResolver;
     private Bitmap          mBitmap;
-    private String          mImagePath;
+    private Uri             mImageUri;
     private int 			mCompressionFactor;
     private double 			mCropDefaulWidthFactor;
 
@@ -150,10 +149,13 @@ public class CropImage extends MonitoredActivity {
                 mAspectY = 1;
             }
 
-            mImagePath = extras.getString(IMAGE_PATH);
+            mImageUri = getImageUri(extras.getString(IMAGE_PATH));
+            mSaveUri = getImageUri(extras.getString(OUTPUT_IMAGE_PATH));
+            if (mSaveUri == null) {
+                mSaveUri = mImageUri;
+            }
 
-            mSaveUri = getImageUri(mImagePath);
-            mBitmap = getBitmap(mImagePath);
+            mBitmap = getBitmap(mImageUri);
 
             if (extras.containsKey(ASPECT_X) && extras.get(ASPECT_X) instanceof Integer) {
 
@@ -271,15 +273,20 @@ public class CropImage extends MonitoredActivity {
     }
 
     private Uri getImageUri(String path) {
+        if (path == null) {
+            return null;
+        }
         if (path.contains("://")) {
             return Uri.parse(path);
         }
         return Uri.fromFile(new File(path));
     }
 
-    private Bitmap getBitmap(String path) {
-
-        Uri uri = getImageUri(path);
+    private Bitmap getBitmap(Uri uri) {
+        if (uri == null) {
+            Log.e(TAG, "uri is null");
+            return null;
+        }
         InputStream in = null;
         try {
             in = mContentResolver.openInputStream(uri);
@@ -304,9 +311,9 @@ public class CropImage extends MonitoredActivity {
 
             return b;
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "file " + path + " not found");
+            Log.e(TAG, "file " + uri + " not found");
         } catch (IOException e) {
-            Log.e(TAG, "file " + path + " not found");
+            Log.e(TAG, "file " + uri + " not found");
         }
         return null;
     }
@@ -498,7 +505,8 @@ public class CropImage extends MonitoredActivity {
             Bundle extras = new Bundle();
             Intent intent = new Intent(mSaveUri.toString());
             intent.putExtras(extras);
-            intent.putExtra(IMAGE_PATH, mImagePath);
+            intent.putExtra(IMAGE_PATH, mImageUri.toString());
+            intent.putExtra(OUTPUT_IMAGE_PATH, mSaveUri.toString());
             intent.putExtra(ORIENTATION_IN_DEGREES, Util.getOrientationInDegree(this));
             setResult(RESULT_OK, intent);
         } else {
