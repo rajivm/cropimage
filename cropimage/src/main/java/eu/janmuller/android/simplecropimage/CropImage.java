@@ -271,7 +271,9 @@ public class CropImage extends MonitoredActivity {
     }
 
     private Uri getImageUri(String path) {
-
+        if (path.contains("://")) {
+            return Uri.parse(path);
+        }
         return Uri.fromFile(new File(path));
     }
 
