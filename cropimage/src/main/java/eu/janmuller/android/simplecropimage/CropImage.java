@@ -207,7 +207,7 @@ public class CropImage extends MonitoredActivity {
             	}
             }else{
             	
-            	mCropDefaulWidthFactor = 0.8;
+            	mCropDefaulWidthFactor = 1.0;
             }
             
         }
@@ -600,16 +600,14 @@ public class CropImage extends MonitoredActivity {
             Rect imageRect = new Rect(0, 0, width, height);
 
 			int cropWidth = (int) (width * mCropDefaulWidthFactor);
-            int cropHeight = cropWidth;
+            int cropHeight = height;
 
             if (mAspectX != 0 && mAspectY != 0) {
-
-                if (mAspectX > mAspectY) {
-
-                    cropHeight = cropWidth * mAspectY / mAspectX;
-                } else {
-
-                    cropWidth = cropHeight * mAspectX / mAspectY;
+                cropWidth = (int) (width * mCropDefaulWidthFactor);
+                cropHeight = (int) (cropWidth * (mAspectY / ((double) mAspectX)));
+                if (cropHeight > height) {
+                    cropHeight = height;
+                    cropWidth =  (int) (cropHeight * (mAspectX / ((double) mAspectY)));
                 }
             }
             
