@@ -72,7 +72,8 @@ public class CropImage extends MonitoredActivity {
     public static final  String RETURN_DATA            = "return-data";
     public static final  String RETURN_DATA_AS_BITMAP  = "data";
     public static final  String ACTION_INLINE_DATA     = "inline-data";
-    
+    public static final int RESULT_FAILED = 2;
+
     /**
      * Specify the compression factor that should be used when saving the cropped image.
      * 
@@ -215,6 +216,7 @@ public class CropImage extends MonitoredActivity {
 
         if (mBitmap == null) {
 
+            setResult(RESULT_FAILED);
             Log.d(TAG, "finish!!!");
             finish();
             return;
